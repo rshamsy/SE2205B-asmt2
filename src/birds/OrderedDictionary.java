@@ -258,11 +258,21 @@ public class OrderedDictionary implements OrderedDictionaryADT{
         
     }
     
+    /**
+     * 
+     * @param k is the DataKey whose successor is to be found
+     * @param closestType is String value denoting whether a successor or predecessor is required
+     * @return a BinaryTreeNode that is closest successor or predecessor to k. If none found, will return null
+     * @throws DictionaryException if closestType is not valid. 
+     */
+    
     private BinaryTreeNode findClosestNode(DataKey k,String closestType) throws DictionaryException{
         
         BinaryTreeNode node = root;
         BinaryTreeNode closestNode = root;
         if (closestType.equals("successor")){
+        
+            findClosestNodeAux(node,
             
         }
         else if (closestType.equals("predecessor")){
@@ -271,8 +281,15 @@ public class OrderedDictionary implements OrderedDictionaryADT{
         else throw new DictionaryException("wrong type of closest node specified - can only be 'successor' or 'predecessor'.");
         return null;
     }
-    
-    private void findClosestNodeAux(BinaryTreeNode nodeStart, BinaryTreeNode nodeOfInterest, String closestType){
+    /**
+     * Auxiliary method for tail recursive calls - comparisons made on the way down the recursive chain - to find closest node to DataKey k. 
+     * 
+     * @param node is the BinaryTreeNode being visited in that call of this method
+     * @param closestNode is the BinaryTreeNode that is updated with the closest node to the node with DataKey k
+     * @param k the DataKey in the node for which the closest node is being searched
+     * @param closestType is a String value denoting whether successor or predecessor is being searched
+     */
+    private void findClosestNodeAux(BinaryTreeNode node, BinaryTreeNode closestNode, DataKey k, String closestType){
         
     }
     
