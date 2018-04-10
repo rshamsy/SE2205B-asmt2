@@ -221,7 +221,7 @@ public class OrderedDictionary implements OrderedDictionaryADT{
             notFound = true;
         }
         if(notFound){
-            return findClosestNode(k,"successor").record; //throws exception if no node is larger than k.
+            return findClosestSuccIter(k,"successor").record; //throws exception if no node is larger than k.
         }
         else{
             BinaryTreeNode firstRight;
@@ -258,6 +258,62 @@ public class OrderedDictionary implements OrderedDictionaryADT{
         
     }
     
+    
+    private BinaryTreeNode findClosestSuccIter(DataKey k, String closestType) throws DictionaryException{
+    
+        BinaryTreeNode closestNode = root;
+        BinaryTreeNode trackNode = root;
+        boolean found = false;
+        
+        while(!found){
+            int comparison1 = trackNode.getKey().compareTo(k);
+            if(comparison1<0){
+                trackNode = trackNode.rightChildNode;
+                if(trackNode.getKey().compareTo(k)>0){
+                    return trackNode;
+                }
+            }
+            else if(comparison1>0){
+                trackNode = trackNode.leftChildNode;
+                if(trackNode.getKey().compareTo(k)<0){
+                    return trackNode.parentNode;
+                }
+                
+            }
+        }
+        return trackNode;
+        
+        
+    }
+    
+    
+    private BinaryTreeNode findClosestPredIter(DataKey k, String closestType) throws DictionaryException{
+    
+        BinaryTreeNode closestNode = root;
+        BinaryTreeNode trackNode = root;
+        boolean found = false;
+        
+        while(!found){
+            int comparison1 = trackNode.getKey().compareTo(k);
+            if(comparison1<0){
+                trackNode = trackNode.rightChildNode;
+                if(trackNode.getKey().compareTo(k)>0){
+                    return trackNode.parentNode;
+                }
+            }
+            else if(comparison1>0){
+                trackNode = trackNode.leftChildNode;
+                if(trackNode.getKey().compareTo(k)<0){
+                    return trackNode;
+                }
+                
+            }
+        }
+        return trackNode;
+        
+        
+    }
+    
     /**
      * 
      * @param k is the DataKey whose successor is to be found
@@ -270,27 +326,57 @@ public class OrderedDictionary implements OrderedDictionaryADT{
         
         BinaryTreeNode node = root;
         BinaryTreeNode closestNode = root;
-        if (closestType.equals("successor")){
         
-            findClosestNodeAux(node,
+        findClosestNodeAux(node, closestNode, k, closestType);
             
-        }
-        else if (closestType.equals("predecessor")){
-            
-        }
-        else throw new DictionaryException("wrong type of closest node specified - can only be 'successor' or 'predecessor'.");
-        return null;
+        return closestNode;
     }
     /**
-     * Auxiliary method for tail recursive calls - comparisons made on the way down the recursive chain - to find closest node to DataKey k. 
+     * Auxiliary method for tail recursive calls - comparisons made on the way down the recursive chain - to find closest node to DataKey k.  
      * 
      * @param node is the BinaryTreeNode being visited in that call of this method
      * @param closestNode is the BinaryTreeNode that is updated with the closest node to the node with DataKey k
      * @param k the DataKey in the node for which the closest node is being searched
      * @param closestType is a String value denoting whether successor or predecessor is being searched
      */
-    private void findClosestNodeAux(BinaryTreeNode node, BinaryTreeNode closestNode, DataKey k, String closestType){
+    private void findClosestNodeAux(BinaryTreeNode node, BinaryTreeNode closestNode, DataKey k, String closestType) throws DictionaryException{
+        DataKey closestData = closestNode.getKey();
+        DataKey nodeData = node.getKey();
+        int comparison1 = nodeData.compareTo(k);
+        int comparison2 = nodeData.compareTo(closestData);
         
+        if(closestType.equals("successor")){
+            if(comparison1>0 & comparison2<0){
+                closestNode = node;
+            }
+            if(node.leftChildNode!=null){
+                findClosestNodeAux(node.leftChildNode, closestNode, k, closestType);
+            }
+            if(node.rightChildNode!=null){
+                findClosestNodeAux(node.rightChildNode, closestNode, k, closestType);
+            }
+        }
+        else if(closestType.equals("predecessor")){
+            if(comparison1<0 & comparison2>0){
+                closestNode = node;
+            }
+            if(node.leftChildNode!=null){
+                findClosestNodeAux(node.leftChildNode, closestNode, k, closestType);
+            }
+            if(node.rightChildNode!=null){
+                findClosestNodeAux(node.rightChildNode, closestNode, k, closestType);
+            }
+        }
+        else {throw new DictionaryException("wrong type of closest node specified - can only be 'successor' or 'predecessor'.");}
+        
+        // account for when closestNode is the root but there exists no successor - ie closest node does not change
+        if(closestType.equals("successor") & closestNode.getKey().compareTo(k)<0){
+            closestNode = null;
+        }
+        else if(closestType.equals("predecessor") & closestNode.getKey().compareTo(k)>0){
+            closestNode = null;
+        }
+
     }
     
     /* Returns the predecessor of k (the record from the ordered dictionary 
@@ -303,37 +389,51 @@ public class OrderedDictionary implements OrderedDictionaryADT{
        @throws DictionaryException
      */
     public BirdRecord predecessor(DataKey k) throws DictionaryException{
-        BinaryTreeNode predecessor;
-        BinaryTreeNode nodeFindPredFor = findNode(k);
-        BinaryTreeNode firstLeft = nodeFindPredFor.leftChildNode;
         
-        if(firstLeft==null){
-            
-            predecessor = nodeFindPredFor; 
-            
-            while(predecessor.parentNode!=null){ //to test each parent node, since no node child will be larger than nodeFindSuccFor
-                predecessor = predecessor.parentNode;
-                if (nodeFindPredFor.record.getDataKey().compareTo(predecessor.record.getDataKey())>0){ //if parent is larger
-                   return predecessor.record;
+        BinaryTreeNode predecessor;
+        BinaryTreeNode nodeFindPredFor = null;
+        boolean notFound = false;
+        
+        try{
+            nodeFindPredFor = findNode(k);
+        }
+        catch(DictionaryException e){
+            notFound = true;
+        }
+        if(notFound){
+            return findClosestPredIter(k,"predecessor").record; //throws exception if no node is larger than k.
+        }
+        else{
+        
+            BinaryTreeNode firstLeft = nodeFindPredFor.leftChildNode;
+
+            if(firstLeft==null){
+
+                predecessor = nodeFindPredFor; 
+
+                while(predecessor.parentNode!=null){ //to test each parent node, since no node child will be larger than nodeFindSuccFor
+                    predecessor = predecessor.parentNode;
+                    if (nodeFindPredFor.record.getDataKey().compareTo(predecessor.record.getDataKey())>0){ //if parent is larger
+                       return predecessor.record;
+                    }
+
                 }
 
-            }
+                throw new DictionaryException("There is no successor for the given record key"); //Will occur only if no successor found. 
 
-            throw new DictionaryException("There is no successor for the given record key"); //Will occur only if no successor found. 
-            
+            }
+            else if (firstLeft.rightChildNode == null){
+                predecessor = firstLeft;
+                return predecessor.record;
+            }
+            else if (firstLeft.rightChildNode!=null){
+                predecessor = firstLeft.rightChildNode;
+                while(predecessor.rightChildNode!=null){
+                    predecessor = predecessor.rightChildNode;
+                }  
+                return predecessor.record;
+            }
         }
-        else if (firstLeft.rightChildNode == null){
-            predecessor = firstLeft;
-            return predecessor.record;
-        }
-        else if (firstLeft.rightChildNode!=null){
-            predecessor = firstLeft.rightChildNode;
-            while(predecessor.rightChildNode!=null){
-                predecessor = predecessor.rightChildNode;
-            }  
-            return predecessor.record;
-        }
-       
         return null;
     }
 
