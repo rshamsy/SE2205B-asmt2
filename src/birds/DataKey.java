@@ -42,6 +42,9 @@ public class DataKey {
             if(comparisonResult<0){
                 return -1;
             }
+            if(comparisonResult>0){
+                return 1;
+            }
         }
         else if(this.birdSize<k.getBirdSize()){
             return -1;
