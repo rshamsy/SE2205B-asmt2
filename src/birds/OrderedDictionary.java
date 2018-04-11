@@ -176,10 +176,16 @@ public class OrderedDictionary implements OrderedDictionaryADT{
     }
 
     private void RemoveChildlessNode(BinaryTreeNode nodeToBeRemoved) {
-        if (nodeToBeRemoved.parentNode.leftChildNode == nodeToBeRemoved) {
-            nodeToBeRemoved.parentNode.leftChildNode = null;
-        } else if (nodeToBeRemoved.parentNode.rightChildNode == nodeToBeRemoved) {
-            nodeToBeRemoved.parentNode.rightChildNode = null;
+        if (nodeToBeRemoved.parentNode == null){ //ie root is the only node
+            root = null;
+        }
+        else {
+            if (nodeToBeRemoved.parentNode.leftChildNode == nodeToBeRemoved) {
+
+                nodeToBeRemoved.parentNode.leftChildNode = null;
+            } else if (nodeToBeRemoved.parentNode.rightChildNode == nodeToBeRemoved) {
+                nodeToBeRemoved.parentNode.rightChildNode = null;
+            }
         }
         nodeToBeRemoved.parentNode = null;
         size--;
